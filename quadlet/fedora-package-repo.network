@@ -1,0 +1,6 @@
+[Unit]
+Description=Fedora package repo network
+
+[Network]
+NetworkName=fedora-package-repo
+Internal=true
