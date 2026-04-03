@@ -38,7 +38,7 @@ func New(stdout io.Writer, stderr io.Writer) (*Services, error) {
 		return nil, err
 	}
 
-	registry, err := appconfig.PackageRegistryLoader{}.Load(paths.PackageManifest())
+	registry, err := appconfig.PackageRegistryLoader{}.Load(paths.PackagesRoot())
 	if err != nil {
 		return nil, fmt.Errorf("load package registry: %w", err)
 	}

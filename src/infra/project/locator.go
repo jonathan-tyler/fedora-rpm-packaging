@@ -19,7 +19,7 @@ func (Locator) Locate() (coreproject.Paths, error) {
 			return coreproject.Paths{}, fmt.Errorf("resolve %s: %w", rootOverrideEnv, err)
 		}
 		paths := coreproject.Paths{Root: absoluteRoot}
-		if !hasManifest(paths.PackageManifest()) {
+		if !hasDirectory(paths.PackagesRoot()) || !hasFile(paths.ToolingConfig()) {
 			return coreproject.Paths{}, fmt.Errorf("%s does not point at a fedora-local-builder repo", rootOverrideEnv)
 		}
 		return paths, nil
@@ -37,7 +37,7 @@ func (Locator) Locate() (coreproject.Paths, error) {
 
 	for {
 		paths := coreproject.Paths{Root: current}
-		if hasManifest(paths.PackageManifest()) {
+		if hasDirectory(paths.PackagesRoot()) && hasFile(paths.ToolingConfig()) {
 			return paths, nil
 		}
 
@@ -51,7 +51,15 @@ func (Locator) Locate() (coreproject.Paths, error) {
 	return coreproject.Paths{}, fmt.Errorf("could not locate fedora-local-builder project root")
 }
 
-func hasManifest(path string) bool {
+func hasDirectory(path string) bool {
+	info, err := os.Stat(path)
+	if err != nil {
+		return false
+	}
+	return info.IsDir()
+}
+
+func hasFile(path string) bool {
 	info, err := os.Stat(path)
 	if err != nil {
 		return false

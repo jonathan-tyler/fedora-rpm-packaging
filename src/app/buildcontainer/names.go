@@ -26,7 +26,7 @@ func newArtifactNames(paths project.Paths, packageName string, now time.Time) ar
 		ImageTag:      fmt.Sprintf("localhost/fedora-package-builder-%s:latest", packageName),
 		PrepContainer: fmt.Sprintf("fpb-%s-prep-%s", packageName, randSuffix),
 		SnapshotImage: fmt.Sprintf("localhost/fedora-package-builder-%s-snapshot:%s", packageName, timestamp),
-		StagedRoot:    filepath.Join(paths.RepoPackageDownloadRoot(packageName), timestamp),
+		StagedRoot:    filepath.Join(paths.RepoPackageArtifactRoot(packageName), timestamp),
 		CloneDir:      filepath.Join("/src", packageName),
 	}
 }

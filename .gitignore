@@ -1,7 +1,7 @@
 state/mock/
 state/results/
 state/repo/fedora/
-state/repo/downloads/
+state/repo/artifacts/
 state/repo/keys/*
 !state/repo/keys/.gitkeep
 state/upstream/*.git/

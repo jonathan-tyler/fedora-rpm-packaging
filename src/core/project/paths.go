@@ -6,8 +6,16 @@ type Paths struct {
 	Root string
 }
 
-func (p Paths) PackageManifest() string {
-	return filepath.Join(p.Root, "config", "packages.json")
+func (p Paths) PackagesRoot() string {
+	return filepath.Join(p.Root, "packages")
+}
+
+func (p Paths) PackageDir(packageName string) string {
+	return filepath.Join(p.PackagesRoot(), packageName)
+}
+
+func (p Paths) PackageManifest(packageName string) string {
+	return filepath.Join(p.PackageDir(packageName), "manifest.json")
 }
 
 func (p Paths) ToolingConfig() string {
@@ -38,8 +46,8 @@ func (p Paths) RepoRoot() string {
 	return filepath.Join(p.Root, "state", "repo")
 }
 
-func (p Paths) RepoPackageDownloadRoot(packageName string) string {
-	return filepath.Join(p.RepoRoot(), "downloads", packageName)
+func (p Paths) RepoPackageArtifactRoot(packageName string) string {
+	return filepath.Join(p.RepoRoot(), "artifacts", packageName)
 }
 
 func (p Paths) RepoFedoraArchRoot(releasever string, basearch string) string {
@@ -55,5 +63,5 @@ func (p Paths) MockConfigDir() string {
 }
 
 func (p Paths) PackageBuildContainerDir(packageName string) string {
-	return filepath.Join(p.Root, "container", "build", packageName)
+	return p.PackageDir(packageName)
 }

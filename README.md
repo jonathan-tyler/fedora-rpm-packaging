@@ -71,7 +71,7 @@ The flow is:
 3. vendor dependencies while the container still has network access
 4. commit that prepared container state to a temporary local image
 5. run the build from that snapshot with the configured offline container runtime arguments
-6. write the built binaries into the staged server tree under `state/repo/downloads/`
+6. write the built binaries into the staged server tree under `state/repo/artifacts/`
 
 This keeps the source checkout out of your host filesystem while still giving you a host-visible artifact at the end.
 
@@ -96,7 +96,7 @@ go run ./src/cmd/fpb build container-binary sesh v2.15.0
 The artifact lands here:
 
 ```text
-state/repo/downloads/PACKAGE/TIMESTAMP/
+state/repo/artifacts/PACKAGE/TIMESTAMP/
    sesh|tv|yazi|ya
    build-info.txt
 ```
@@ -113,18 +113,18 @@ At that point the binary is available from the repo server as a normal static do
 
 ## Important Distinction
 
-This container flow produces raw staged binary downloads, not RPMs.
+This container flow produces raw staged build artifacts, not RPMs.
 
 That is intentional. It is the lowest-risk way to prove the online-fetch then offline-build boundary before we invest in a full RPM recipe for the same package.
 
 ## Directory Layout
 
 ```text
-config/                 project-local configuration and package registry
-container/build/        ephemeral package build images
+config/                 project-local shared configuration
 clients/                example DNF repo files for client machines
 mock/                   project-local mock overrides
-packaging/              spec files, source tarballs, and packaging notes
+packaging/              spec files and source tarballs for RPM packaging
+packages/               package manifests and build contexts
 state/                  generated mirrors, build outputs, and staged repo data
 src/cmd/fpb/            main CLI entrypoint
 src/commands/           CLI adapters and command routing
@@ -133,7 +133,33 @@ src/core/               domain models and ports
 src/infra/              filesystem, config, archive, command, and external-tool adapters
 ```
 
-The package registry lives in `config/packages.json` instead of shell functions.
+Each package now lives under `packages/<name>/`.
+
+The package directory is the source of truth for package-specific configuration. At minimum it contains:
+
+- `manifest.json` for package metadata
+- `Containerfile` for container-binary builds when that package supports them
+
+RPM packaging inputs live separately under `packaging/<name>/`. When that tree exists for a package, keep the spec file and source tarballs there, for example:
+
+```text
+packaging/
+   sesh/
+      sesh.spec
+      SOURCES/
+   television/
+      television.spec
+      SOURCES/
+   yazi/
+      yazi.spec
+      SOURCES/
+```
+
+Keep the connected preparation steps separate from the mock rebuild step:
+
+- create source tarballs from a pinned upstream commit or tag
+- vendor dependencies into a separate tarball when the package ecosystem needs it
+- make the SRPM self-contained before calling mock
 
 External tool names and default extra arguments live in `config/tooling.json`.
 
@@ -160,7 +186,7 @@ Use this repo tree for connected preparation and local staging:
 - create vendored source bundles under state/vendor/
 - run mock rebuilds into state/results/
 - publish the signed staged repo into state/repo/
-- stage raw binary downloads into state/repo/downloads/
+- stage raw binary artifacts into state/repo/artifacts/
 
 Then import that staged repo into the service-owned live repo with `fpb repo sync-service`.
 
