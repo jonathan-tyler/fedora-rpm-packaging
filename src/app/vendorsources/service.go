@@ -11,11 +11,13 @@ import (
 	"github.com/him/fedora-local-builder/src/core/packages"
 	"github.com/him/fedora-local-builder/src/core/platform"
 	"github.com/him/fedora-local-builder/src/core/project"
+	"github.com/him/fedora-local-builder/src/infra/external"
 )
 
 type Service struct {
 	Registry packages.Registry
 	Paths    project.Paths
+	Tools    external.Tooling
 	Runner   platform.Runner
 	Archiver corearchive.Archiver
 	Stdout   io.Writer
@@ -61,13 +63,7 @@ func (s Service) Run(ctx context.Context, packageName string, worktree string) e
 }
 
 func (s Service) vendorGo(ctx context.Context, definition packages.Definition, worktree string, vendorRoot string) error {
-	if err := s.Runner.Run(ctx, platform.Command{
-		Name:   "go",
-		Args:   []string{"mod", "vendor"},
-		Dir:    worktree,
-		Stdout: s.Stdout,
-		Stderr: s.Stdout,
-	}); err != nil {
+	if err := s.Runner.Run(ctx, s.Tools.Go.ModVendorCommand(worktree, s.Stdout, s.Stdout)); err != nil {
 		return err
 	}
 
@@ -80,12 +76,7 @@ func (s Service) vendorGo(ctx context.Context, definition packages.Definition, w
 
 func (s Service) vendorCargo(ctx context.Context, definition packages.Definition, worktree string, vendorRoot string) error {
 	vendorDirectory := filepath.Join(vendorRoot, "vendor")
-	configOutput, err := s.Runner.Capture(ctx, platform.Command{
-		Name:   "cargo",
-		Args:   []string{"vendor", vendorDirectory},
-		Dir:    worktree,
-		Stderr: s.Stdout,
-	})
+	configOutput, err := s.Runner.Capture(ctx, s.Tools.Cargo.VendorCommand(worktree, vendorDirectory, s.Stdout))
 	if err != nil {
 		return err
 	}

@@ -1,0 +1,43 @@
+{
+  "git": {
+    "command": "git",
+    "clone_extra_args": [
+      "--depth",
+      "1"
+    ],
+    "mirror_clone_extra_args": []
+  },
+  "container_runtime": {
+    "kind": "podman",
+    "build_extra_args": [],
+    "prepare_run_extra_args": [],
+    "offline_run_extra_args": [
+      "--network",
+      "none"
+    ],
+    "commit_extra_args": [],
+    "remove_container_extra_args": [],
+    "remove_image_extra_args": []
+  },
+  "go": {
+    "command": "go"
+  },
+  "cargo": {
+    "command": "cargo"
+  },
+  "mock": {
+    "command": "mock"
+  },
+  "rpmsign": {
+    "command": "rpmsign"
+  },
+  "createrepo": {
+    "command": "createrepo_c"
+  },
+  "gpg": {
+    "command": "gpg"
+  },
+  "systemctl": {
+    "command": "systemctl"
+  }
+}

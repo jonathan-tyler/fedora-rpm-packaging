@@ -10,6 +10,10 @@ func (p Paths) PackageManifest() string {
 	return filepath.Join(p.Root, "config", "packages.json")
 }
 
+func (p Paths) ToolingConfig() string {
+	return filepath.Join(p.Root, "config", "tooling.json")
+}
+
 func (p Paths) UpstreamRoot() string {
 	return filepath.Join(p.Root, "state", "upstream")
 }

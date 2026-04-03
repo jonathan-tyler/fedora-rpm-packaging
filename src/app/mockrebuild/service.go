@@ -9,11 +9,13 @@ import (
 	"github.com/him/fedora-local-builder/src/core/packages"
 	"github.com/him/fedora-local-builder/src/core/platform"
 	"github.com/him/fedora-local-builder/src/core/project"
+	"github.com/him/fedora-local-builder/src/infra/external"
 )
 
 type Service struct {
 	Registry packages.Registry
 	Paths    project.Paths
+	Tools    external.Tooling
 	Runner   platform.Runner
 	Stdout   io.Writer
 }
@@ -32,20 +34,12 @@ func (s Service) Run(ctx context.Context, packageName string, srpmPath string) e
 		return fmt.Errorf("create result directory: %w", err)
 	}
 
-	return s.Runner.Run(ctx, platform.Command{
-		Name: "mock",
-		Args: []string{
-			"--configdir", s.Paths.MockConfigDir(),
-			"--root", "fedora-42-x86_64",
-			"--resultdir", resultDir,
-			"--rebuild", srpmPath,
-		},
-		Env: map[string]string{
-			"FEDORA_PACKAGE_BUILDER_ROOT": s.Paths.Root,
-		},
-		Stdout: s.Stdout,
-		Stderr: s.Stdout,
-	})
+	command := s.Tools.Mock.RebuildCommand(s.Paths.MockConfigDir(), resultDir, srpmPath, "fedora-42-x86_64", s.Stdout, s.Stdout)
+	command.Env = map[string]string{
+		"FEDORA_PACKAGE_BUILDER_ROOT": s.Paths.Root,
+	}
+
+	return s.Runner.Run(ctx, command)
 }
 
 func fileExists(path string) bool {

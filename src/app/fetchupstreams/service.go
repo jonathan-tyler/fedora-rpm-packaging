@@ -10,11 +10,13 @@ import (
 	"github.com/him/fedora-local-builder/src/core/packages"
 	"github.com/him/fedora-local-builder/src/core/platform"
 	"github.com/him/fedora-local-builder/src/core/project"
+	"github.com/him/fedora-local-builder/src/infra/external"
 )
 
 type Service struct {
 	Registry packages.Registry
 	Paths    project.Paths
+	Tools    external.Tooling
 	Runner   platform.Runner
 	Stdout   io.Writer
 }
@@ -32,19 +34,9 @@ func (s Service) Run(ctx context.Context, packageNames []string) error {
 	for _, definition := range definitions {
 		target := filepath.Join(s.Paths.UpstreamRoot(), definition.Name+".git")
 		if directoryExists(target) {
-			err = s.Runner.Run(ctx, platform.Command{
-				Name:   "git",
-				Args:   []string{"-C", target, "fetch", "--prune", "--tags", "origin"},
-				Stdout: s.Stdout,
-				Stderr: s.Stdout,
-			})
+			err = s.Runner.Run(ctx, s.Tools.Git.FetchMirrorCommand(target, s.Stdout, s.Stdout))
 		} else {
-			err = s.Runner.Run(ctx, platform.Command{
-				Name:   "git",
-				Args:   []string{"clone", "--mirror", definition.RepoURL, target},
-				Stdout: s.Stdout,
-				Stderr: s.Stdout,
-			})
+			err = s.Runner.Run(ctx, s.Tools.Git.MirrorCloneCommand(definition.RepoURL, target, s.Stdout, s.Stdout))
 		}
 		if err != nil {
 			return err

@@ -20,7 +20,7 @@ type Definition struct {
 	Name                 string                      `json:"name"`
 	RepoURL              string                      `json:"repo_url"`
 	BuildSystem          BuildSystem                 `json:"build_system"`
-	BinaryName           string                      `json:"binary_name"`
+	OutputBinaries       []string                    `json:"output_binaries"`
 	VendorHint           string                      `json:"vendor_hint"`
 	ContainerBinaryBuild ContainerBinaryBuildSupport `json:"container_binary_build"`
 }
@@ -36,8 +36,13 @@ func (d Definition) Validate() error {
 	if d.RepoURL == "" {
 		return fmt.Errorf("package %s repo URL is required", d.Name)
 	}
-	if d.BinaryName == "" {
-		return fmt.Errorf("package %s binary name is required", d.Name)
+	if len(d.OutputBinaries) == 0 {
+		return fmt.Errorf("package %s must define at least one output binary", d.Name)
+	}
+	for _, outputBinary := range d.OutputBinaries {
+		if outputBinary == "" {
+			return fmt.Errorf("package %s has an empty output binary name", d.Name)
+		}
 	}
 	if d.VendorHint == "" {
 		return fmt.Errorf("package %s vendor hint is required", d.Name)

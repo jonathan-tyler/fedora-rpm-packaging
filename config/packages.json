@@ -4,25 +4,25 @@
       "name": "sesh",
       "repo_url": "https://github.com/joshmedeski/sesh.git",
       "build_system": "go",
-      "binary_name": "sesh",
+      "output_binaries": ["sesh"],
       "vendor_hint": "Run go mod vendor and include the vendor tree in the source snapshot.",
       "container_binary_build": "yes"
     },
     {
       "name": "television",
-      "repo_url": "https://github.com/mikaelmello/television.git",
+      "repo_url": "https://github.com/alexpasmantier/television.git",
       "build_system": "cargo",
-      "binary_name": "tv",
+      "output_binaries": ["tv"],
       "vendor_hint": "Confirm the current upstream Cargo flow, then freeze dependencies with cargo vendor.",
-      "container_binary_build": "not-yet"
+      "container_binary_build": "yes"
     },
     {
       "name": "yazi",
       "repo_url": "https://github.com/sxyazi/yazi.git",
       "build_system": "cargo",
-      "binary_name": "yazi",
+      "output_binaries": ["yazi", "ya"],
       "vendor_hint": "Use cargo vendor and keep Cargo.lock pinned for the SRPM.",
-      "container_binary_build": "not-yet"
+      "container_binary_build": "yes"
     }
   ]
 }

@@ -11,11 +11,13 @@ import (
 	"github.com/him/fedora-local-builder/src/core/packages"
 	"github.com/him/fedora-local-builder/src/core/platform"
 	"github.com/him/fedora-local-builder/src/core/project"
+	"github.com/him/fedora-local-builder/src/infra/external"
 )
 
 type Service struct {
 	Registry packages.Registry
 	Paths    project.Paths
+	Tools    external.Tooling
 	Runner   platform.Runner
 	Stdout   io.Writer
 }
@@ -63,22 +65,12 @@ func (s Service) Run(ctx context.Context, packageName string, releasever string,
 	}
 
 	if gpgKey != "" {
-		if err := s.Runner.Run(ctx, platform.Command{
-			Name:   "rpmsign",
-			Args:   append([]string{"--addsign"}, binaryRPMs...),
-			Stdout: s.Stdout,
-			Stderr: s.Stdout,
-		}); err != nil {
+		if err := s.Runner.Run(ctx, s.Tools.RPMSign.AddSignCommand(binaryRPMs, s.Stdout, s.Stdout)); err != nil {
 			return err
 		}
 	}
 
-	if err := s.Runner.Run(ctx, platform.Command{
-		Name:   "createrepo_c",
-		Args:   []string{"--update", repoDir},
-		Stdout: s.Stdout,
-		Stderr: s.Stdout,
-	}); err != nil {
+	if err := s.Runner.Run(ctx, s.Tools.CreateRepo.UpdateCommand(repoDir, s.Stdout, s.Stdout)); err != nil {
 		return err
 	}
 
@@ -100,11 +92,7 @@ func (s Service) Run(ctx context.Context, packageName string, releasever string,
 }
 
 func (s Service) exportPublicKey(ctx context.Context, gpgKey string) error {
-	publicKey, err := s.Runner.Capture(ctx, platform.Command{
-		Name:   "gpg",
-		Args:   []string{"--batch", "--yes", "--armor", "--export", gpgKey},
-		Stderr: s.Stdout,
-	})
+	publicKey, err := s.Runner.Capture(ctx, s.Tools.GPG.ExportArmoredPublicKeyCommand(gpgKey, s.Stdout))
 	if err != nil {
 		return err
 	}
@@ -117,17 +105,13 @@ func (s Service) exportPublicKey(ctx context.Context, gpgKey string) error {
 }
 
 func (s Service) signRepositoryMetadata(ctx context.Context, gpgKey string, repoDir string) error {
-	return s.Runner.Run(ctx, platform.Command{
-		Name: "gpg",
-		Args: []string{
-			"--batch", "--yes", "--armor", "--detach-sign",
-			"--local-user", gpgKey,
-			"--output", filepath.Join(repoDir, "repodata", "repomd.xml.asc"),
-			filepath.Join(repoDir, "repodata", "repomd.xml"),
-		},
-		Stdout: s.Stdout,
-		Stderr: s.Stdout,
-	})
+	return s.Runner.Run(ctx, s.Tools.GPG.DetachSignCommand(
+		gpgKey,
+		filepath.Join(repoDir, "repodata", "repomd.xml.asc"),
+		filepath.Join(repoDir, "repodata", "repomd.xml"),
+		s.Stdout,
+		s.Stdout,
+	))
 }
 
 func copyFile(sourcePath string, targetPath string) error {

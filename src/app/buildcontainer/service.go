@@ -9,11 +9,13 @@ import (
 	"github.com/him/fedora-local-builder/src/core/packages"
 	"github.com/him/fedora-local-builder/src/core/platform"
 	"github.com/him/fedora-local-builder/src/core/project"
+	"github.com/him/fedora-local-builder/src/infra/external"
 )
 
 type Service struct {
 	Registry packages.Registry
 	Paths    project.Paths
+	Tools    external.Tooling
 	Runner   platform.Runner
 	Clock    platform.Clock
 	Stdout   io.Writer
@@ -35,44 +37,29 @@ func (s Service) Run(ctx context.Context, request Request) error {
 
 	defer s.cleanup(context.Background(), names)
 
-	if err := s.Runner.Run(ctx, platform.Command{
-		Name:   "podman",
-		Args:   []string{"build", "-t", names.ImageTag, s.Paths.PackageBuildContainerDir(request.PackageName)},
-		Stdout: s.Stdout,
-		Stderr: s.Stdout,
-	}); err != nil {
+	if err := s.Runner.Run(ctx, s.Tools.ContainerRuntime.BuildCommand(names.ImageTag, s.Paths.PackageBuildContainerDir(request.PackageName), s.Stdout, s.Stdout)); err != nil {
 		return err
 	}
 
-	if err := s.Runner.Run(ctx, platform.Command{
-		Name:   "podman",
-		Args:   []string{"run", "--name", names.PrepContainer, names.ImageTag, "bash", "-lc", prepCommandText(definition, names, request.Ref)},
-		Stdout: s.Stdout,
-		Stderr: s.Stdout,
-	}); err != nil {
+	prepText, err := prepCommandText(definition, names, request.Ref, s.Tools)
+	if err != nil {
 		return err
 	}
 
-	if err := s.Runner.Run(ctx, platform.Command{
-		Name:   "podman",
-		Args:   []string{"commit", names.PrepContainer, names.SnapshotImage},
-		Stdout: io.Discard,
-		Stderr: s.Stdout,
-	}); err != nil {
+	if err := s.Runner.Run(ctx, s.Tools.ContainerRuntime.PrepareRunCommand(names.PrepContainer, names.ImageTag, prepText, s.Stdout, s.Stdout)); err != nil {
 		return err
 	}
 
-	if err := s.Runner.Run(ctx, platform.Command{
-		Name: "podman",
-		Args: []string{
-			"run", "--rm", "--network", "none",
-			"-v", names.StagedRoot + ":/out:Z",
-			names.SnapshotImage,
-			"bash", "-lc", buildCommandText(definition, names),
-		},
-		Stdout: s.Stdout,
-		Stderr: s.Stdout,
-	}); err != nil {
+	if err := s.Runner.Run(ctx, s.Tools.ContainerRuntime.CommitCommand(names.PrepContainer, names.SnapshotImage, io.Discard, s.Stdout)); err != nil {
+		return err
+	}
+
+	buildText, err := buildCommandText(definition, names, s.Tools)
+	if err != nil {
+		return err
+	}
+
+	if err := s.Runner.Run(ctx, s.Tools.ContainerRuntime.OfflineRunCommand(names.StagedRoot+":/out:Z", names.SnapshotImage, buildText, s.Stdout, s.Stdout)); err != nil {
 		return err
 	}
 
@@ -85,16 +72,6 @@ func (s Service) Run(ctx context.Context, request Request) error {
 }
 
 func (s Service) cleanup(ctx context.Context, names artifactNames) {
-	_ = s.Runner.Run(ctx, platform.Command{
-		Name:   "podman",
-		Args:   []string{"rm", "-f", names.PrepContainer},
-		Stdout: io.Discard,
-		Stderr: io.Discard,
-	})
-	_ = s.Runner.Run(ctx, platform.Command{
-		Name:   "podman",
-		Args:   []string{"image", "rm", "-f", names.SnapshotImage},
-		Stdout: io.Discard,
-		Stderr: io.Discard,
-	})
+	_ = s.Runner.Run(ctx, s.Tools.ContainerRuntime.RemoveContainerCommand(names.PrepContainer, io.Discard, io.Discard))
+	_ = s.Runner.Run(ctx, s.Tools.ContainerRuntime.RemoveImageCommand(names.SnapshotImage, io.Discard, io.Discard))
 }

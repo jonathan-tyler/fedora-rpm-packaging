@@ -9,10 +9,12 @@ import (
 
 	"github.com/him/fedora-local-builder/src/core/platform"
 	"github.com/him/fedora-local-builder/src/core/project"
+	"github.com/him/fedora-local-builder/src/infra/external"
 )
 
 type Service struct {
 	Paths  project.Paths
+	Tools  external.Tooling
 	Runner platform.Runner
 	Stdout io.Writer
 }
@@ -30,12 +32,7 @@ func (s Service) Run(ctx context.Context, targetHome string, xdgConfigHome strin
 		return fmt.Errorf("create repo server root: %w", err)
 	}
 
-	if err := s.Runner.Run(ctx, platform.Command{
-		Name:   "podman",
-		Args:   []string{"build", "-t", "localhost/fedora-package-repo-nginx:latest", s.Paths.NginxContainerDir()},
-		Stdout: s.Stdout,
-		Stderr: s.Stdout,
-	}); err != nil {
+	if err := s.Runner.Run(ctx, s.Tools.ContainerRuntime.BuildCommand("localhost/fedora-package-repo-nginx:latest", s.Paths.NginxContainerDir(), s.Stdout, s.Stdout)); err != nil {
 		return err
 	}
 
@@ -46,12 +43,7 @@ func (s Service) Run(ctx context.Context, targetHome string, xdgConfigHome strin
 		return err
 	}
 
-	if err := s.Runner.Run(ctx, platform.Command{
-		Name:   "systemctl",
-		Args:   []string{"--user", "daemon-reload"},
-		Stdout: s.Stdout,
-		Stderr: s.Stdout,
-	}); err != nil {
+	if err := s.Runner.Run(ctx, s.Tools.Systemctl.UserDaemonReloadCommand(s.Stdout, s.Stdout)); err != nil {
 		return err
 	}
 

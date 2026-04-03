@@ -22,6 +22,8 @@ The current target clients are Odin and Fenrir.
 
 The implementation is now a Go CLI with a hexagonal layout. There is no script wrapper layer anymore.
 
+External tool invocation is also centralized now. Command names and default extra arguments live in `config/tooling.json` instead of being hardcoded across the app layer.
+
 The mock decision is intentional. Nested mock inside a rootless container is possible to chase, but it is the wrong default because mock is most reliable when it owns the Fedora build root directly on the host.
 
 ## Recommended Deployment Model
@@ -52,28 +54,34 @@ If you later want a stricter no-egress guarantee for the HTTP container itself, 
 ## Target Packages
 
 - sesh: Go, vendor with go mod vendor
-- television: likely Rust and Cargo, confirm upstream state before locking the packaging flow
-- yazi: Rust Cargo workspace, vendor with cargo vendor
+- television: Rust Cargo build, stages `tv`
+- yazi: Rust Cargo workspace build, stages `yazi` and `ya`
 
-## First Containerized Build
+## Containerized Builds
 
-The first implemented containerized build target is `sesh`.
+The implemented containerized build targets are `sesh`, `television`, and `yazi`.
 
 The flow is:
 
 1. build a local Fedora builder image
-2. clone `sesh` with `git clone --depth 1` inside the container
-3. vendor Go dependencies while the container still has network access
+2. clone the target repository inside the container
+3. vendor dependencies while the container still has network access
 4. commit that prepared container state to a temporary local image
-5. run the build from that snapshot with `podman --network none`
-6. write the built binary into the staged server tree under `state/repo/downloads/`
+5. run the build from that snapshot with the configured offline container runtime arguments
+6. write the built binaries into the staged server tree under `state/repo/downloads/`
 
 This keeps the source checkout out of your host filesystem while still giving you a host-visible artifact at the end.
+
+By default, `config/tooling.json` sets Git clone extra arguments to `--depth 1` and the offline container runtime extra arguments to `--network none`.
+
+The container runtime defaults to Podman. There is also a Docker shim that reuses the Podman-compatible argument model, but it is only a placeholder for future work and is not validated or supported yet.
 
 Run it with:
 
 ```bash
 go run ./src/cmd/fpb build container-binary sesh
+go run ./src/cmd/fpb build container-binary television
+go run ./src/cmd/fpb build container-binary yazi
 ```
 
 Or pin a tag or branch:
@@ -85,10 +93,12 @@ go run ./src/cmd/fpb build container-binary sesh v2.15.0
 The artifact lands here:
 
 ```text
-state/repo/downloads/sesh/TIMESTAMP/
-   sesh
+state/repo/downloads/PACKAGE/TIMESTAMP/
+   sesh|tv|yazi|ya
    build-info.txt
 ```
+
+For `yazi`, the staged directory includes both `yazi` and `ya`.
 
 Then publish it to the live service with the existing sync step:
 
@@ -100,7 +110,7 @@ At that point the binary is available from the repo server as a normal static do
 
 ## Important Distinction
 
-This first container flow produces a raw staged binary download, not an RPM.
+This container flow produces raw staged binary downloads, not RPMs.
 
 That is intentional. It is the lowest-risk way to prove the online-fetch then offline-build boundary before we invest in a full RPM recipe for the same package.
 
@@ -119,10 +129,12 @@ src/cmd/fpb/            main CLI entrypoint
 src/commands/           CLI adapters and command routing
 src/app/                application use cases
 src/core/               domain models and ports
-src/infra/              filesystem, config, archive, and command adapters
+src/infra/              filesystem, config, archive, command, and external-tool adapters
 ```
 
 The package registry lives in `config/packages.json` instead of shell functions.
+
+External tool names and default extra arguments live in `config/tooling.json`.
 
 ## Service User Layout
 

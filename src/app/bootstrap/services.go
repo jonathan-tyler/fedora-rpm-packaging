@@ -6,6 +6,7 @@ import (
 
 	apparchive "github.com/him/fedora-local-builder/src/infra/archive"
 	appconfig "github.com/him/fedora-local-builder/src/infra/config"
+	appexternal "github.com/him/fedora-local-builder/src/infra/external"
 	appproject "github.com/him/fedora-local-builder/src/infra/project"
 	appsystem "github.com/him/fedora-local-builder/src/infra/system"
 
@@ -23,6 +24,7 @@ import (
 type Services struct {
 	Paths          coreproject.Paths
 	Registry       packages.Registry
+	Tooling        appexternal.Tooling
 	FetchUpstreams fetchupstreams.Service
 	VendorSources  vendorsources.Service
 	MockRebuild    mockrebuild.Service
@@ -43,6 +45,11 @@ func New(stdout io.Writer, stderr io.Writer) (*Services, error) {
 		return nil, fmt.Errorf("load package registry: %w", err)
 	}
 
+	tooling, err := appconfig.ToolingLoader{}.Load(paths.ToolingConfig())
+	if err != nil {
+		return nil, fmt.Errorf("load tooling config: %w", err)
+	}
+
 	runner := appsystem.NewCommandRunner(stdout, stderr)
 	archiver := apparchive.TarGzArchiver{}
 	clock := appsystem.Clock{}
@@ -50,15 +57,18 @@ func New(stdout io.Writer, stderr io.Writer) (*Services, error) {
 	services := &Services{
 		Paths:    paths,
 		Registry: registry,
+		Tooling:  tooling,
 		FetchUpstreams: fetchupstreams.Service{
 			Registry: registry,
 			Paths:    paths,
+			Tools:    tooling,
 			Runner:   runner,
 			Stdout:   stdout,
 		},
 		VendorSources: vendorsources.Service{
 			Registry: registry,
 			Paths:    paths,
+			Tools:    tooling,
 			Runner:   runner,
 			Archiver: archiver,
 			Stdout:   stdout,
@@ -66,12 +76,14 @@ func New(stdout io.Writer, stderr io.Writer) (*Services, error) {
 		MockRebuild: mockrebuild.Service{
 			Registry: registry,
 			Paths:    paths,
+			Tools:    tooling,
 			Runner:   runner,
 			Stdout:   stdout,
 		},
 		PublishRepo: publishrepo.Service{
 			Registry: registry,
 			Paths:    paths,
+			Tools:    tooling,
 			Runner:   runner,
 			Stdout:   stdout,
 		},
@@ -81,12 +93,14 @@ func New(stdout io.Writer, stderr io.Writer) (*Services, error) {
 		},
 		InstallQuadlet: installquadlet.Service{
 			Paths:  paths,
+			Tools:  tooling,
 			Runner: runner,
 			Stdout: stdout,
 		},
 		BuildContainer: buildcontainer.Service{
 			Registry: registry,
 			Paths:    paths,
+			Tools:    tooling,
 			Runner:   runner,
 			Clock:    clock,
 			Stdout:   stdout,
