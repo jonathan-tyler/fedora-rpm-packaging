@@ -57,15 +57,3 @@ func (p Paths) MockConfigDir() string {
 func (p Paths) PackageBuildContainerDir(packageName string) string {
 	return filepath.Join(p.Root, "container", "build", packageName)
 }
-
-func (p Paths) NginxContainerDir() string {
-	return filepath.Join(p.Root, "container", "nginx")
-}
-
-func (p Paths) QuadletNetworkUnit() string {
-	return filepath.Join(p.Root, "quadlet", "fedora-package-repo.network")
-}
-
-func (p Paths) QuadletContainerUnit() string {
-	return filepath.Join(p.Root, "quadlet", "fedora-package-repo.container")
-}

@@ -10,7 +10,6 @@ import (
 	"github.com/him/fedora-local-builder/src/commands/dispatch"
 	"github.com/him/fedora-local-builder/src/commands/packagecmd"
 	repocmd "github.com/him/fedora-local-builder/src/commands/repo"
-	servicecmd "github.com/him/fedora-local-builder/src/commands/service"
 	sourcecmd "github.com/him/fedora-local-builder/src/commands/source"
 	upstreamcmd "github.com/him/fedora-local-builder/src/commands/upstream"
 )
@@ -32,7 +31,6 @@ func main() {
 		buildcmd.NewMockRebuildCommand(services),
 		repocmd.NewPublishCommand(services),
 		repocmd.NewSyncServiceCommand(services),
-		servicecmd.NewInstallQuadletCommand(services),
 	)
 
 	if len(os.Args) == 1 {

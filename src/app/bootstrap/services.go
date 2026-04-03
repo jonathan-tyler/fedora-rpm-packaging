@@ -12,7 +12,6 @@ import (
 
 	"github.com/him/fedora-local-builder/src/app/buildcontainer"
 	"github.com/him/fedora-local-builder/src/app/fetchupstreams"
-	"github.com/him/fedora-local-builder/src/app/installquadlet"
 	"github.com/him/fedora-local-builder/src/app/mockrebuild"
 	"github.com/him/fedora-local-builder/src/app/publishrepo"
 	"github.com/him/fedora-local-builder/src/app/syncrepo"
@@ -30,7 +29,6 @@ type Services struct {
 	MockRebuild    mockrebuild.Service
 	PublishRepo    publishrepo.Service
 	SyncRepo       syncrepo.Service
-	InstallQuadlet installquadlet.Service
 	BuildContainer buildcontainer.Service
 }
 
@@ -89,12 +87,6 @@ func New(stdout io.Writer, stderr io.Writer) (*Services, error) {
 		},
 		SyncRepo: syncrepo.Service{
 			Paths:  paths,
-			Stdout: stdout,
-		},
-		InstallQuadlet: installquadlet.Service{
-			Paths:  paths,
-			Tools:  tooling,
-			Runner: runner,
 			Stdout: stdout,
 		},
 		BuildContainer: buildcontainer.Service{

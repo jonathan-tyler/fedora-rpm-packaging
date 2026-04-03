@@ -1,8 +1,10 @@
 # Fedora Package Builder
 
-Build reproducible Fedora RPMs with mock, sign them with your own GPG key, and serve them to multiple Fedora machines over HTTP.
+Build reproducible Fedora RPMs with mock, sign them with your own GPG key, and stage them for a separate repository-hosting service.
 
 This repo implementation lives under `repos/fedora-local-builder/` inside the parent project.
+
+The Nginx, Quadlet, and WSL repo-service setup assets now live in the sibling repo `repos/fedora-package-repo-container/`.
 
 ## Why This Project Exists
 
@@ -13,12 +15,13 @@ The current target clients are Odin and Fenrir.
 ## Design Summary
 
 - mock runs on the Fedora host instead of inside a rootless container
-- Podman plus Quadlet run the HTTP repository server as a rootless user service under a dedicated repo account
 - package builds run separately as one-off jobs under the normal WSL user
 - the build phase is offline by default
 - source fetch and dependency vendoring are explicit pre-build steps
 - packages and repository metadata are signed with your own GPG key
 - the live repo is updated through a handoff step instead of being owned directly by the daily user
+
+The long-running HTTP service is intentionally split out from this builder repo.
 
 The implementation is now a Go CLI with a hexagonal layout. There is no script wrapper layer anymore.
 
@@ -106,7 +109,7 @@ Then publish it to the live service with the existing sync step:
 sudo -iu reposvc bash -lc 'cd /home/him/my/forge/home/2026-03-mouse-free-migration/2026-04-fedora-package-builder/repos/fedora-local-builder && go run ./src/cmd/fpb repo sync-service'
 ```
 
-At that point the binary is available from the repo server as a normal static download.
+At that point the binary is available from the repo server as a normal static download once the sibling service repo is installed.
 
 ## Important Distinction
 
@@ -119,11 +122,9 @@ That is intentional. It is the lowest-risk way to prove the online-fetch then of
 ```text
 config/                 project-local configuration and package registry
 container/build/        ephemeral package build images
-container/nginx/        Nginx image and config for serving the repo
 clients/                example DNF repo files for client machines
 mock/                   project-local mock overrides
 packaging/              spec files, source tarballs, and packaging notes
-quadlet/                rootless Quadlet units for the repo server
 state/                  generated mirrors, build outputs, and staged repo data
 src/cmd/fpb/            main CLI entrypoint
 src/commands/           CLI adapters and command routing
@@ -135,6 +136,8 @@ src/infra/              filesystem, config, archive, command, and external-tool 
 The package registry lives in `config/packages.json` instead of shell functions.
 
 External tool names and default extra arguments live in `config/tooling.json`.
+
+Repository hosting assets live in the sibling repo `repos/fedora-package-repo-container/`.
 
 ## Service User Layout
 
@@ -229,10 +232,10 @@ That split keeps the actual build step deterministic and mostly offline while st
    sudo -iu reposvc bash -lc 'cd /home/him/my/forge/home/2026-03-mouse-free-migration/2026-04-fedora-package-builder/repos/fedora-local-builder && go run ./src/cmd/fpb repo sync-service'
    ```
 
-9. Build and install the Quadlet files as the service user.
+9. Install the sibling repo-service container as the service user.
 
    ```bash
-   sudo -iu reposvc bash -lc 'cd /home/him/my/forge/home/2026-03-mouse-free-migration/2026-04-fedora-package-builder/repos/fedora-local-builder && go run ./src/cmd/fpb service install-quadlet'
+   sudo -iu reposvc bash -lc 'cd /home/him/my/forge/home/2026-03-mouse-free-migration/2026-04-fedora-package-builder/repos/fedora-package-repo-container && bash scripts/install-quadlet.sh'
    sudo -iu reposvc systemctl --user enable --now fedora-package-repo.service
    ```
 
@@ -250,7 +253,6 @@ fpb build container-binary PACKAGE [REF]
 fpb build mock-rebuild PACKAGE path/to/package.src.rpm
 fpb repo publish PACKAGE
 fpb repo sync-service
-fpb service install-quadlet
 ```
 
 Use `go run ./src/cmd/fpb help` to print the available commands.
@@ -264,7 +266,7 @@ The intended steady state is:
 - Windows firewall restricts ingress to the machines you choose
 - only the explicit fetch and vendoring step may touch the internet
 
-The current Quadlet scaffold is the simple mode: rootless container plus published LAN port. It is good enough for a low-threat environment.
+The sibling repo-service scaffold is the simple mode: rootless container plus published LAN port. It is good enough for a low-threat environment.
 
 If you later decide the container must have a hard no-egress boundary instead of a practical one, switch the service to a host-owned socket plus an internal Podman network.
 
