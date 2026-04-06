@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	corearchive "github.com/him/fedora-local-builder/src/core/archive"
+	corearchive "github.com/your-github-username/fedora-package-builder/src/core/archive"
 )
 
 type TarGzArchiver struct{}

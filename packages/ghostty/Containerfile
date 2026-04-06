@@ -1,0 +1,15 @@
+FROM registry.fedoraproject.org/fedora:42
+
+ARG ZIG_VERSION=0.15.2
+
+RUN dnf -y install ca-certificates curl git gettext gtk4-devel gtk4-layer-shell-devel \
+    libadwaita-devel oniguruma-devel pandoc pkgconf-pkg-config blueprint-compiler tar xz && \
+    curl -fsSL "https://ziglang.org/download/${ZIG_VERSION}/zig-x86_64-linux-${ZIG_VERSION}.tar.xz" -o /tmp/zig.tar.xz && \
+    tar -xJf /tmp/zig.tar.xz -C /opt && \
+    ln -s "/opt/zig-x86_64-linux-${ZIG_VERSION}/zig" /usr/local/bin/zig && \
+    rm -f /tmp/zig.tar.xz && \
+    dnf clean all
+
+COPY . /pkg
+
+WORKDIR /src

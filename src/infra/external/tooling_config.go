@@ -8,6 +8,7 @@ type GitConfig struct {
 	Command              string   `json:"command"`
 	CloneExtraArgs       []string `json:"clone_extra_args"`
 	MirrorCloneExtraArgs []string `json:"mirror_clone_extra_args"`
+	MirrorFetchExtraArgs []string `json:"mirror_fetch_extra_args"`
 }
 
 type ContainerRuntimeConfig struct {
@@ -25,6 +26,7 @@ type ToolingConfig struct {
 	ContainerRuntime ContainerRuntimeConfig `json:"container_runtime"`
 	Go               ToolConfig             `json:"go"`
 	Cargo            ToolConfig             `json:"cargo"`
+	SRPMBuilder      ToolConfig             `json:"srpm_builder"`
 	Mock             ToolConfig             `json:"mock"`
 	RPMSign          ToolConfig             `json:"rpmsign"`
 	CreateRepo       ToolConfig             `json:"createrepo"`
@@ -37,7 +39,8 @@ func DefaultToolingConfig() ToolingConfig {
 		Git: GitConfig{
 			Command:              "git",
 			CloneExtraArgs:       []string{"--depth", "1"},
-			MirrorCloneExtraArgs: []string{},
+			MirrorCloneExtraArgs: []string{"--depth", "1"},
+			MirrorFetchExtraArgs: []string{"--depth", "1"},
 		},
 		ContainerRuntime: ContainerRuntimeConfig{
 			Kind:                     "podman",
@@ -48,12 +51,13 @@ func DefaultToolingConfig() ToolingConfig {
 			RemoveContainerExtraArgs: []string{},
 			RemoveImageExtraArgs:     []string{},
 		},
-		Go:         ToolConfig{Command: "go"},
-		Cargo:      ToolConfig{Command: "cargo"},
-		Mock:       ToolConfig{Command: "mock"},
-		RPMSign:    ToolConfig{Command: "rpmsign"},
-		CreateRepo: ToolConfig{Command: "createrepo_c"},
-		GPG:        ToolConfig{Command: "gpg"},
-		Systemctl:  ToolConfig{Command: "systemctl"},
+		Go:          ToolConfig{Command: "go"},
+		Cargo:       ToolConfig{Command: "cargo"},
+		SRPMBuilder: ToolConfig{Command: "./scripts/build-srpm-container.sh"},
+		Mock:        ToolConfig{Command: "./scripts/mock-rebuild-container.sh"},
+		RPMSign:     ToolConfig{Command: "rpmsign"},
+		CreateRepo:  ToolConfig{Command: "./scripts/createrepo-container.sh"},
+		GPG:         ToolConfig{Command: "gpg"},
+		Systemctl:   ToolConfig{Command: "systemctl"},
 	}
 }

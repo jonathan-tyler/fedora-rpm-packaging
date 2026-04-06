@@ -7,6 +7,7 @@ type Tooling struct {
 	ContainerRuntime ContainerRuntime
 	Go               GoTool
 	Cargo            CargoTool
+	SRPMBuilder      SRPMBuilderTool
 	Mock             MockTool
 	RPMSign          RPMSignTool
 	CreateRepo       CreateRepoTool
@@ -33,6 +34,11 @@ func NewTooling(config ToolingConfig) (Tooling, error) {
 	cargoTool, err := NewCargoTool(config.Cargo)
 	if err != nil {
 		return Tooling{}, fmt.Errorf("build cargo tooling: %w", err)
+	}
+
+	srpmBuilderTool, err := NewSRPMBuilderTool(config.SRPMBuilder)
+	if err != nil {
+		return Tooling{}, fmt.Errorf("build srpm builder tooling: %w", err)
 	}
 
 	mockTool, err := NewMockTool(config.Mock)
@@ -65,6 +71,7 @@ func NewTooling(config ToolingConfig) (Tooling, error) {
 		ContainerRuntime: containerRuntime,
 		Go:               goTool,
 		Cargo:            cargoTool,
+		SRPMBuilder:      srpmBuilderTool,
 		Mock:             mockTool,
 		RPMSign:          rpmSignTool,
 		CreateRepo:       createRepoTool,

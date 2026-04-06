@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/him/fedora-local-builder/src/core/commandline"
-	"github.com/him/fedora-local-builder/src/core/packages"
+	"github.com/your-github-username/fedora-package-builder/src/core/commandline"
+	"github.com/your-github-username/fedora-package-builder/src/core/packages"
 )
 
 func buildInfoCommandText(definition packages.Definition) string {

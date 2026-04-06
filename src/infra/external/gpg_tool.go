@@ -3,7 +3,7 @@ package external
 import (
 	"io"
 
-	"github.com/him/fedora-local-builder/src/core/platform"
+	"github.com/your-github-username/fedora-package-builder/src/core/platform"
 )
 
 type GPGTool struct {

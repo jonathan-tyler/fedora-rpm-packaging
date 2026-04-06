@@ -1,0 +1,9 @@
+{
+    "repo_url": "https://github.com/eza-community/eza.git",
+    "build_system": "cargo",
+    "output_binaries": [
+        "eza"
+    ],
+    "vendor_hint": "Use cargo vendor from the exact release tag and keep the default Git feature enabled for the RPM build.",
+    "container_binary_build": "yes"
+}

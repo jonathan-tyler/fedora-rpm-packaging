@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	coreproject "github.com/him/fedora-local-builder/src/core/project"
+	coreproject "github.com/your-github-username/fedora-package-builder/src/core/project"
 )
 
 const rootOverrideEnv = "FEDORA_PACKAGE_BUILDER_ROOT"
@@ -20,7 +20,7 @@ func (Locator) Locate() (coreproject.Paths, error) {
 		}
 		paths := coreproject.Paths{Root: absoluteRoot}
 		if !hasDirectory(paths.PackagesRoot()) || !hasFile(paths.ToolingConfig()) {
-			return coreproject.Paths{}, fmt.Errorf("%s does not point at a fedora-local-builder repo", rootOverrideEnv)
+			return coreproject.Paths{}, fmt.Errorf("%s does not point at a fedora-package-builder repo", rootOverrideEnv)
 		}
 		return paths, nil
 	}
@@ -48,7 +48,7 @@ func (Locator) Locate() (coreproject.Paths, error) {
 		current = parent
 	}
 
-	return coreproject.Paths{}, fmt.Errorf("could not locate fedora-local-builder project root")
+	return coreproject.Paths{}, fmt.Errorf("could not locate fedora-package-builder project root")
 }
 
 func hasDirectory(path string) bool {

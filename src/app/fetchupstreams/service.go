@@ -7,10 +7,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/him/fedora-local-builder/src/core/packages"
-	"github.com/him/fedora-local-builder/src/core/platform"
-	"github.com/him/fedora-local-builder/src/core/project"
-	"github.com/him/fedora-local-builder/src/infra/external"
+	"github.com/your-github-username/fedora-package-builder/src/core/packages"
+	"github.com/your-github-username/fedora-package-builder/src/core/platform"
+	"github.com/your-github-username/fedora-package-builder/src/core/project"
+	"github.com/your-github-username/fedora-package-builder/src/infra/external"
 )
 
 type Service struct {
@@ -33,13 +33,21 @@ func (s Service) Run(ctx context.Context, packageNames []string) error {
 
 	for _, definition := range definitions {
 		target := filepath.Join(s.Paths.UpstreamRoot(), definition.Name+".git")
+		clonedFresh := false
 		if directoryExists(target) {
 			err = s.Runner.Run(ctx, s.Tools.Git.FetchMirrorCommand(target, s.Stdout, s.Stdout))
 		} else {
 			err = s.Runner.Run(ctx, s.Tools.Git.MirrorCloneCommand(definition.RepoURL, target, s.Stdout, s.Stdout))
+			clonedFresh = true
 		}
 		if err != nil {
 			return err
+		}
+
+		if clonedFresh {
+			if err := s.Runner.Run(ctx, s.Tools.Git.FetchMirrorCommand(target, s.Stdout, s.Stdout)); err != nil {
+				return err
+			}
 		}
 
 		if _, err := fmt.Fprintf(s.Stdout, "mirrored %s from %s\n", definition.Name, definition.RepoURL); err != nil {

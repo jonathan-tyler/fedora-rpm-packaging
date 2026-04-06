@@ -49,7 +49,7 @@ func (d Definition) Validate() error {
 	}
 
 	switch d.BuildSystem {
-	case BuildSystemGo, BuildSystemCargo:
+	case "", BuildSystemGo, BuildSystemCargo:
 	default:
 		return fmt.Errorf("package %s has unsupported build system %q", d.Name, d.BuildSystem)
 	}

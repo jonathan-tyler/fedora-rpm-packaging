@@ -3,13 +3,14 @@ package external
 import (
 	"io"
 
-	"github.com/him/fedora-local-builder/src/core/platform"
+	"github.com/your-github-username/fedora-package-builder/src/core/platform"
 )
 
 type Git struct {
 	command              string
 	cloneExtraArgs       []string
 	mirrorCloneExtraArgs []string
+	mirrorFetchExtraArgs []string
 }
 
 func NewGit(config GitConfig) (Git, error) {
@@ -21,6 +22,7 @@ func NewGit(config GitConfig) (Git, error) {
 		command:              config.Command,
 		cloneExtraArgs:       append([]string{}, config.CloneExtraArgs...),
 		mirrorCloneExtraArgs: append([]string{}, config.MirrorCloneExtraArgs...),
+		mirrorFetchExtraArgs: append([]string{}, config.MirrorFetchExtraArgs...),
 	}, nil
 }
 
@@ -48,10 +50,22 @@ func (g Git) MirrorCloneCommand(repoURL string, destination string, stdout io.Wr
 }
 
 func (g Git) FetchMirrorCommand(target string, stdout io.Writer, stderr io.Writer) platform.Command {
+	args := []string{"-C", target, "fetch"}
+	args = append(args, g.mirrorFetchExtraArgs...)
+	args = append(args, "--prune", "--tags", "origin")
+
 	return platform.Command{
 		Name:   g.command,
-		Args:   []string{"-C", target, "fetch", "--prune", "--tags", "origin"},
+		Args:   args,
 		Stdout: stdout,
+		Stderr: stderr,
+	}
+}
+
+func (g Git) ListRemoteTagsCommand(repoURL string, stderr io.Writer) platform.Command {
+	return platform.Command{
+		Name:   g.command,
+		Args:   []string{"ls-remote", "--refs", "--tags", repoURL},
 		Stderr: stderr,
 	}
 }

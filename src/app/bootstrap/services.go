@@ -4,20 +4,21 @@ import (
 	"fmt"
 	"io"
 
-	apparchive "github.com/him/fedora-local-builder/src/infra/archive"
-	appconfig "github.com/him/fedora-local-builder/src/infra/config"
-	appexternal "github.com/him/fedora-local-builder/src/infra/external"
-	appproject "github.com/him/fedora-local-builder/src/infra/project"
-	appsystem "github.com/him/fedora-local-builder/src/infra/system"
+	apparchive "github.com/your-github-username/fedora-package-builder/src/infra/archive"
+	appconfig "github.com/your-github-username/fedora-package-builder/src/infra/config"
+	appexternal "github.com/your-github-username/fedora-package-builder/src/infra/external"
+	appproject "github.com/your-github-username/fedora-package-builder/src/infra/project"
+	appsystem "github.com/your-github-username/fedora-package-builder/src/infra/system"
 
-	"github.com/him/fedora-local-builder/src/app/buildcontainer"
-	"github.com/him/fedora-local-builder/src/app/fetchupstreams"
-	"github.com/him/fedora-local-builder/src/app/mockrebuild"
-	"github.com/him/fedora-local-builder/src/app/publishrepo"
-	"github.com/him/fedora-local-builder/src/app/syncrepo"
-	"github.com/him/fedora-local-builder/src/app/vendorsources"
-	"github.com/him/fedora-local-builder/src/core/packages"
-	coreproject "github.com/him/fedora-local-builder/src/core/project"
+	"github.com/your-github-username/fedora-package-builder/src/app/buildcontainer"
+	"github.com/your-github-username/fedora-package-builder/src/app/buildsrpm"
+	"github.com/your-github-username/fedora-package-builder/src/app/fetchupstreams"
+	"github.com/your-github-username/fedora-package-builder/src/app/mockrebuild"
+	"github.com/your-github-username/fedora-package-builder/src/app/publishrepo"
+	"github.com/your-github-username/fedora-package-builder/src/app/syncrepo"
+	"github.com/your-github-username/fedora-package-builder/src/app/vendorsources"
+	"github.com/your-github-username/fedora-package-builder/src/core/packages"
+	coreproject "github.com/your-github-username/fedora-package-builder/src/core/project"
 )
 
 type Services struct {
@@ -26,6 +27,7 @@ type Services struct {
 	Tooling        appexternal.Tooling
 	FetchUpstreams fetchupstreams.Service
 	VendorSources  vendorsources.Service
+	BuildSRPM      buildsrpm.Service
 	MockRebuild    mockrebuild.Service
 	PublishRepo    publishrepo.Service
 	SyncRepo       syncrepo.Service
@@ -69,6 +71,13 @@ func New(stdout io.Writer, stderr io.Writer) (*Services, error) {
 			Tools:    tooling,
 			Runner:   runner,
 			Archiver: archiver,
+			Stdout:   stdout,
+		},
+		BuildSRPM: buildsrpm.Service{
+			Registry: registry,
+			Paths:    paths,
+			Tools:    tooling,
+			Runner:   runner,
 			Stdout:   stdout,
 		},
 		MockRebuild: mockrebuild.Service{

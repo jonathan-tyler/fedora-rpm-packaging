@@ -6,12 +6,14 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 
-	corearchive "github.com/him/fedora-local-builder/src/core/archive"
-	"github.com/him/fedora-local-builder/src/core/packages"
-	"github.com/him/fedora-local-builder/src/core/platform"
-	"github.com/him/fedora-local-builder/src/core/project"
-	"github.com/him/fedora-local-builder/src/infra/external"
+	corearchive "github.com/your-github-username/fedora-package-builder/src/core/archive"
+	"github.com/your-github-username/fedora-package-builder/src/core/commandline"
+	"github.com/your-github-username/fedora-package-builder/src/core/packages"
+	"github.com/your-github-username/fedora-package-builder/src/core/platform"
+	"github.com/your-github-username/fedora-package-builder/src/core/project"
+	"github.com/your-github-username/fedora-package-builder/src/infra/external"
 )
 
 type Service struct {
@@ -27,6 +29,11 @@ func (s Service) Run(ctx context.Context, packageName string, worktree string) e
 	definition, err := s.Registry.Lookup(packageName)
 	if err != nil {
 		return err
+	}
+
+	worktree, err = filepath.Abs(worktree)
+	if err != nil {
+		return fmt.Errorf("resolve worktree path: %w", err)
 	}
 
 	if !directoryExists(worktree) {
@@ -76,10 +83,28 @@ func (s Service) vendorGo(ctx context.Context, definition packages.Definition, w
 
 func (s Service) vendorCargo(ctx context.Context, definition packages.Definition, worktree string, vendorRoot string) error {
 	vendorDirectory := filepath.Join(vendorRoot, "vendor")
-	configOutput, err := s.Runner.Capture(ctx, s.Tools.Cargo.VendorCommand(worktree, vendorDirectory, s.Stdout))
+	if err := s.Runner.Run(ctx, s.Tools.ContainerRuntime.BuildCommand(vendorImageTag(definition.Name), s.Paths.PackageBuildContainerDir(definition.Name), s.Stdout, s.Stdout)); err != nil {
+		return err
+	}
+
+	configOutput, err := s.Runner.Capture(ctx, platform.Command{
+		Name: s.Tools.ContainerRuntime.CommandName(),
+		Args: []string{
+			"run",
+			"--rm",
+			"-v", worktree + ":/src:ro,Z",
+			"-v", vendorRoot + ":/vendor:Z",
+			vendorImageTag(definition.Name),
+			"bash",
+			"-lc",
+			cargoVendorCommandText(vendorDirectory),
+		},
+		Stderr: s.Stdout,
+	})
 	if err != nil {
 		return err
 	}
+	configOutput = normalizeCargoVendorConfig(configOutput)
 
 	configPath := filepath.Join(vendorRoot, "cargo-config.toml")
 	if err := os.WriteFile(configPath, []byte(configOutput), 0o644); err != nil {
@@ -91,6 +116,22 @@ func (s Service) vendorCargo(ctx context.Context, definition packages.Definition
 		{SourcePath: vendorDirectory, ArchivePath: "vendor"},
 		{SourcePath: configPath, ArchivePath: "cargo-config.toml"},
 	})
+}
+
+func vendorImageTag(packageName string) string {
+	return fmt.Sprintf("localhost/fedora-package-builder-%s:latest", packageName)
+}
+
+func cargoVendorCommandText(vendorDirectory string) string {
+	tokens := []string{"cd", "/src", "&&"}
+	for _, token := range []string{"cargo", "vendor", filepath.ToSlash(filepath.Join("/vendor", filepath.Base(vendorDirectory)))} {
+		tokens = append(tokens, commandline.Quote(token))
+	}
+	return strings.Join(tokens, " ")
+}
+
+func normalizeCargoVendorConfig(configOutput string) string {
+	return strings.ReplaceAll(configOutput, "/vendor/vendor", "vendor")
 }
 
 func directoryExists(path string) bool {

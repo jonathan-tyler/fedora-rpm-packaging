@@ -1,3 +1,3 @@
-module github.com/him/fedora-local-builder
+module github.com/jonathan-tyler/fedora-package-builder
 
 go 1.25.0

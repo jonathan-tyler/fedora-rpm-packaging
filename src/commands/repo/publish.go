@@ -3,10 +3,9 @@ package repo
 import (
 	"context"
 	"fmt"
-	"os"
 
-	"github.com/him/fedora-local-builder/src/app/bootstrap"
-	"github.com/him/fedora-local-builder/src/commands/dispatch"
+	"github.com/your-github-username/fedora-package-builder/src/app/bootstrap"
+	"github.com/your-github-username/fedora-package-builder/src/commands/dispatch"
 )
 
 func NewPublishCommand(services *bootstrap.Services) dispatch.FuncCommand {
@@ -15,17 +14,8 @@ func NewPublishCommand(services *bootstrap.Services) dispatch.FuncCommand {
 			return fmt.Errorf("usage: fpb repo publish PACKAGE")
 		}
 
-		releasever := getenvDefault("FEDORA_PACKAGE_RELEASEVER", "42")
-		basearch := getenvDefault("FEDORA_PACKAGE_BASEARCH", "x86_64")
-		gpgKey := os.Getenv("FEDORA_PACKAGE_GPG_KEY")
+		releasever, basearch, gpgKey := repoEnvironment()
 
 		return services.PublishRepo.Run(ctx, args[0], releasever, basearch, gpgKey)
 	})
-}
-
-func getenvDefault(name string, fallback string) string {
-	if value := os.Getenv(name); value != "" {
-		return value
-	}
-	return fallback
 }

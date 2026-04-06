@@ -8,10 +8,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/him/fedora-local-builder/src/core/packages"
-	"github.com/him/fedora-local-builder/src/core/platform"
-	"github.com/him/fedora-local-builder/src/core/project"
-	"github.com/him/fedora-local-builder/src/infra/external"
+	"github.com/your-github-username/fedora-package-builder/src/core/packages"
+	"github.com/your-github-username/fedora-package-builder/src/core/platform"
+	"github.com/your-github-username/fedora-package-builder/src/core/project"
+	"github.com/your-github-username/fedora-package-builder/src/infra/external"
 )
 
 type Service struct {
@@ -20,6 +20,15 @@ type Service struct {
 	Tools    external.Tooling
 	Runner   platform.Runner
 	Stdout   io.Writer
+}
+
+func (s Service) Init(ctx context.Context, releasever string, basearch string, gpgKey string) error {
+	repoDir, err := s.prepareRepoDir(releasever, basearch)
+	if err != nil {
+		return err
+	}
+
+	return s.finalizeRepository(ctx, repoDir, gpgKey, "initialized repository metadata in %s\n", "initialized signed repository metadata in %s\n", "repository metadata is unsigned; set FEDORA_PACKAGE_GPG_KEY to export the public key and generate repomd.xml.asc\n")
 }
 
 func (s Service) Run(ctx context.Context, packageName string, releasever string, basearch string, gpgKey string) error {
@@ -32,12 +41,9 @@ func (s Service) Run(ctx context.Context, packageName string, releasever string,
 		return fmt.Errorf("Result directory not found: %s", sourceDir)
 	}
 
-	repoDir := s.Paths.RepoFedoraArchRoot(releasever, basearch)
-	if err := os.MkdirAll(repoDir, 0o755); err != nil {
-		return fmt.Errorf("create repo directory: %w", err)
-	}
-	if err := os.MkdirAll(filepath.Dir(s.Paths.RepoPublicKeyPath()), 0o755); err != nil {
-		return fmt.Errorf("create key directory: %w", err)
+	repoDir, err := s.prepareRepoDir(releasever, basearch)
+	if err != nil {
+		return err
 	}
 
 	rpms, err := filepath.Glob(filepath.Join(sourceDir, "*.rpm"))
@@ -54,6 +60,9 @@ func (s Service) Run(ctx context.Context, packageName string, releasever string,
 			continue
 		}
 		targetPath := filepath.Join(repoDir, filepath.Base(rpmPath))
+		if err := removeOptionalFile(targetPath + ".sig"); err != nil {
+			return err
+		}
 		if err := copyFile(rpmPath, targetPath); err != nil {
 			return err
 		}
@@ -68,8 +77,27 @@ func (s Service) Run(ctx context.Context, packageName string, releasever string,
 		if err := s.Runner.Run(ctx, s.Tools.RPMSign.AddSignCommand(binaryRPMs, s.Stdout, s.Stdout)); err != nil {
 			return err
 		}
+		if err := removeSignatureSidecars(binaryRPMs); err != nil {
+			return err
+		}
 	}
 
+	return s.finalizeRepository(ctx, repoDir, gpgKey, "published %s into %s\n", "published %s into %s with signed RPMs and repository metadata\n", "package payload and repository metadata are unsigned; set FEDORA_PACKAGE_GPG_KEY and ~/.rpmmacros before publishing for DNF clients\n", packageName)
+}
+
+func (s Service) prepareRepoDir(releasever string, basearch string) (string, error) {
+	repoDir := s.Paths.RepoFedoraArchRoot(releasever, basearch)
+	if err := os.MkdirAll(repoDir, 0o755); err != nil {
+		return "", fmt.Errorf("create repo directory: %w", err)
+	}
+	if err := os.MkdirAll(filepath.Dir(s.Paths.RepoPublicKeyPath()), 0o755); err != nil {
+		return "", fmt.Errorf("create key directory: %w", err)
+	}
+
+	return repoDir, nil
+}
+
+func (s Service) finalizeRepository(ctx context.Context, repoDir string, gpgKey string, unsignedMessage string, signedMessage string, unsignedNote string, args ...any) error {
 	if err := s.Runner.Run(ctx, s.Tools.CreateRepo.UpdateCommand(repoDir, s.Stdout, s.Stdout)); err != nil {
 		return err
 	}
@@ -81,11 +109,27 @@ func (s Service) Run(ctx context.Context, packageName string, releasever string,
 		if err := s.signRepositoryMetadata(ctx, gpgKey, repoDir); err != nil {
 			return err
 		}
+	} else {
+		if err := s.clearSigningArtifacts(repoDir); err != nil {
+			return err
+		}
 	}
 
-	_, err = fmt.Fprintf(s.Stdout, "published %s into %s\n", packageName, repoDir)
+	message := unsignedMessage
+	if gpgKey != "" {
+		message = signedMessage
+	}
+
+	formatArgs := append(args, repoDir)
+	_, err := fmt.Fprintf(s.Stdout, message, formatArgs...)
 	if err != nil {
 		return fmt.Errorf("write output: %w", err)
+	}
+
+	if gpgKey == "" {
+		if _, err := fmt.Fprint(s.Stdout, unsignedNote); err != nil {
+			return fmt.Errorf("write output: %w", err)
+		}
 	}
 
 	return nil
@@ -114,6 +158,21 @@ func (s Service) signRepositoryMetadata(ctx context.Context, gpgKey string, repo
 	))
 }
 
+func (s Service) clearSigningArtifacts(repoDir string) error {
+	paths := []string{
+		filepath.Join(repoDir, "repodata", "repomd.xml.asc"),
+		s.Paths.RepoPublicKeyPath(),
+	}
+
+	for _, path := range paths {
+		if err := os.Remove(path); err != nil && !os.IsNotExist(err) {
+			return fmt.Errorf("remove stale signing artifact %s: %w", path, err)
+		}
+	}
+
+	return nil
+}
+
 func copyFile(sourcePath string, targetPath string) error {
 	sourceFile, err := os.Open(sourcePath)
 	if err != nil {
@@ -129,6 +188,24 @@ func copyFile(sourcePath string, targetPath string) error {
 
 	if _, err := io.Copy(targetFile, sourceFile); err != nil {
 		return fmt.Errorf("copy %s to %s: %w", sourcePath, targetPath, err)
+	}
+
+	return nil
+}
+
+func removeSignatureSidecars(rpms []string) error {
+	for _, rpmPath := range rpms {
+		if err := removeOptionalFile(rpmPath + ".sig"); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func removeOptionalFile(path string) error {
+	if err := os.Remove(path); err != nil && !os.IsNotExist(err) {
+		return fmt.Errorf("remove %s: %w", path, err)
 	}
 
 	return nil

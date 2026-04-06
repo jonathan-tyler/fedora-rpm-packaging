@@ -1,0 +1,9 @@
+{
+    "repo_url": "https://github.com/jesseduffield/lazygit.git",
+    "build_system": "go",
+    "output_binaries": [
+        "lazygit"
+    ],
+    "vendor_hint": "Upstream already commits a vendor tree, so package from the tagged source snapshot directly.",
+    "container_binary_build": "not-yet"
+}

@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/him/fedora-local-builder/src/app/bootstrap"
-	buildcmd "github.com/him/fedora-local-builder/src/commands/build"
-	"github.com/him/fedora-local-builder/src/commands/dispatch"
-	"github.com/him/fedora-local-builder/src/commands/packagecmd"
-	repocmd "github.com/him/fedora-local-builder/src/commands/repo"
-	sourcecmd "github.com/him/fedora-local-builder/src/commands/source"
-	upstreamcmd "github.com/him/fedora-local-builder/src/commands/upstream"
+	"github.com/your-github-username/fedora-package-builder/src/app/bootstrap"
+	buildcmd "github.com/your-github-username/fedora-package-builder/src/commands/build"
+	"github.com/your-github-username/fedora-package-builder/src/commands/dispatch"
+	"github.com/your-github-username/fedora-package-builder/src/commands/packagecmd"
+	repocmd "github.com/your-github-username/fedora-package-builder/src/commands/repo"
+	sourcecmd "github.com/your-github-username/fedora-package-builder/src/commands/source"
+	upstreamcmd "github.com/your-github-username/fedora-package-builder/src/commands/upstream"
 )
 
 var version = "dev"
@@ -25,10 +25,13 @@ func main() {
 
 	dispatcher := dispatch.New(
 		packagecmd.NewListCommand(services, os.Stdout),
+		packagecmd.NewArtifactTagCommand(services),
 		upstreamcmd.NewFetchCommand(services),
 		sourcecmd.NewVendorCommand(services),
 		buildcmd.NewContainerBinaryCommand(services),
+		buildcmd.NewSRPMCommand(services),
 		buildcmd.NewMockRebuildCommand(services),
+		repocmd.NewInitCommand(services),
 		repocmd.NewPublishCommand(services),
 		repocmd.NewSyncServiceCommand(services),
 	)

@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/him/fedora-local-builder/src/app/bootstrap"
-	"github.com/him/fedora-local-builder/src/app/buildcontainer"
-	"github.com/him/fedora-local-builder/src/commands/dispatch"
+	"github.com/your-github-username/fedora-package-builder/src/app/bootstrap"
+	"github.com/your-github-username/fedora-package-builder/src/app/buildcontainer"
+	"github.com/your-github-username/fedora-package-builder/src/commands/dispatch"
 )
 
 func NewContainerBinaryCommand(services *bootstrap.Services) dispatch.FuncCommand {

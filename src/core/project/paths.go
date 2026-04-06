@@ -34,6 +34,22 @@ func (p Paths) VendorPackageRoot(packageName string) string {
 	return filepath.Join(p.VendorRoot(), packageName)
 }
 
+func (p Paths) PackagingRoot() string {
+	return filepath.Join(p.Root, "packaging")
+}
+
+func (p Paths) PackagingDir(packageName string) string {
+	return filepath.Join(p.PackagingRoot(), packageName)
+}
+
+func (p Paths) PackageSpec(packageName string) string {
+	return filepath.Join(p.PackagingDir(packageName), packageName+".spec")
+}
+
+func (p Paths) PackageSourcesDir(packageName string) string {
+	return filepath.Join(p.PackagingDir(packageName), "SOURCES")
+}
+
 func (p Paths) ResultsRoot() string {
 	return filepath.Join(p.Root, "state", "results")
 }
@@ -42,12 +58,16 @@ func (p Paths) PackageResultsRoot(packageName string) string {
 	return filepath.Join(p.ResultsRoot(), packageName)
 }
 
-func (p Paths) RepoRoot() string {
-	return filepath.Join(p.Root, "state", "repo")
+func (p Paths) ArtifactsRoot() string {
+	return filepath.Join(p.Root, "state", "artifacts")
 }
 
-func (p Paths) RepoPackageArtifactRoot(packageName string) string {
-	return filepath.Join(p.RepoRoot(), "artifacts", packageName)
+func (p Paths) PackageArtifactsRoot(packageName string) string {
+	return filepath.Join(p.ArtifactsRoot(), packageName)
+}
+
+func (p Paths) RepoRoot() string {
+	return filepath.Join(p.Root, "state", "repo")
 }
 
 func (p Paths) RepoFedoraArchRoot(releasever string, basearch string) string {

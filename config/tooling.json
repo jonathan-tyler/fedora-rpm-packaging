@@ -5,7 +5,14 @@
       "--depth",
       "1"
     ],
-    "mirror_clone_extra_args": []
+    "mirror_clone_extra_args": [
+      "--depth",
+      "1"
+    ],
+    "mirror_fetch_extra_args": [
+      "--depth",
+      "1"
+    ]
   },
   "container_runtime": {
     "kind": "podman",
@@ -25,14 +32,17 @@
   "cargo": {
     "command": "cargo"
   },
+  "srpm_builder": {
+    "command": "./scripts/build-srpm-container.sh"
+  },
   "mock": {
-    "command": "mock"
+    "command": "./scripts/mock-rebuild-container.sh"
   },
   "rpmsign": {
     "command": "rpmsign"
   },
   "createrepo": {
-    "command": "createrepo_c"
+    "command": "./scripts/createrepo-container.sh"
   },
   "gpg": {
     "command": "gpg"

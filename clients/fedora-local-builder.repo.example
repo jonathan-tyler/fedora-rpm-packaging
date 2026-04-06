@@ -1,8 +1,8 @@
 [local-fedora-builder]
 name=Local Fedora Builder
-baseurl=http://REPO_HOST:8080/fedora/$releasever/$basearch/
+baseurl=http://REPO_HOST:8090/fedora/$releasever/$basearch/
 enabled=1
 gpgcheck=1
 repo_gpgcheck=1
-gpgkey=http://REPO_HOST:8080/keys/RPM-GPG-KEY-local-fedora-builder
+gpgkey=http://REPO_HOST:8090/keys/RPM-GPG-KEY-local-fedora-builder
 metadata_expire=6h

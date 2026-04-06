@@ -3,4 +3,6 @@ FROM registry.fedoraproject.org/fedora:42
 RUN dnf -y install ca-certificates git cargo rust gcc gcc-c++ make perl-core pkgconf-pkg-config oniguruma-devel && \
     dnf clean all
 
+COPY . /pkg
+
 WORKDIR /src

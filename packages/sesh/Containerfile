@@ -3,4 +3,6 @@ FROM registry.fedoraproject.org/fedora:42
 RUN dnf -y install ca-certificates git golang && \
     dnf clean all
 
+COPY . /pkg
+
 WORKDIR /src
