@@ -22,7 +22,3 @@ Follow [docs/service-install.md](docs/service-install.md) for service-user overr
 - The live repo defaults to `~reposvc/fedora-package-repo/repo`
 - The service-owned repo copy defaults to `~reposvc/fedora-package-repo-service`
 - Quadlet units are installed under `~/.config/containers/systemd`
-
-## Disclaimer
-
-This project is built for personal use, experimentation, and learning. If you choose to use it in a production environment, you are responsible for validating and operating it safely.
