@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/your-github-username/fedora-package-builder/src/core/platform"
+	"github.com/your-github-username/fedora-package-infra/builder/src/core/platform"
 )
 
 type ContainerRuntime interface {

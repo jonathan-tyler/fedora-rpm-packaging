@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/your-github-username/fedora-package-builder/src/core/packages"
+	"github.com/your-github-username/fedora-package-infra/builder/src/core/packages"
 )
 
 type PackageRegistryLoader struct{}

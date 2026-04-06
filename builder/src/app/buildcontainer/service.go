@@ -7,10 +7,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/your-github-username/fedora-package-builder/src/core/packages"
-	"github.com/your-github-username/fedora-package-builder/src/core/platform"
-	"github.com/your-github-username/fedora-package-builder/src/core/project"
-	"github.com/your-github-username/fedora-package-builder/src/infra/external"
+	"github.com/your-github-username/fedora-package-infra/builder/src/core/packages"
+	"github.com/your-github-username/fedora-package-infra/builder/src/core/platform"
+	"github.com/your-github-username/fedora-package-infra/builder/src/core/project"
+	"github.com/your-github-username/fedora-package-infra/builder/src/infra/external"
 )
 
 type Service struct {

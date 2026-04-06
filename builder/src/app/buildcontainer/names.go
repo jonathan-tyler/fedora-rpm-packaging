@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/your-github-username/fedora-package-builder/src/core/project"
+	"github.com/your-github-username/fedora-package-infra/builder/src/core/project"
 )
 
 type artifactNames struct {

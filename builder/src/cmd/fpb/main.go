@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/your-github-username/fedora-package-builder/src/app/bootstrap"
-	buildcmd "github.com/your-github-username/fedora-package-builder/src/commands/build"
-	"github.com/your-github-username/fedora-package-builder/src/commands/dispatch"
-	"github.com/your-github-username/fedora-package-builder/src/commands/packagecmd"
-	repocmd "github.com/your-github-username/fedora-package-builder/src/commands/repo"
-	sourcecmd "github.com/your-github-username/fedora-package-builder/src/commands/source"
-	upstreamcmd "github.com/your-github-username/fedora-package-builder/src/commands/upstream"
+	"github.com/your-github-username/fedora-package-infra/builder/src/app/bootstrap"
+	buildcmd "github.com/your-github-username/fedora-package-infra/builder/src/commands/build"
+	"github.com/your-github-username/fedora-package-infra/builder/src/commands/dispatch"
+	"github.com/your-github-username/fedora-package-infra/builder/src/commands/packagecmd"
+	repocmd "github.com/your-github-username/fedora-package-infra/builder/src/commands/repo"
+	sourcecmd "github.com/your-github-username/fedora-package-infra/builder/src/commands/source"
+	upstreamcmd "github.com/your-github-username/fedora-package-infra/builder/src/commands/upstream"
 )
 
 var version = "dev"

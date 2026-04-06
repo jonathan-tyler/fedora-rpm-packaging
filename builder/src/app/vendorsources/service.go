@@ -8,12 +8,12 @@ import (
 	"path/filepath"
 	"strings"
 
-	corearchive "github.com/your-github-username/fedora-package-builder/src/core/archive"
-	"github.com/your-github-username/fedora-package-builder/src/core/commandline"
-	"github.com/your-github-username/fedora-package-builder/src/core/packages"
-	"github.com/your-github-username/fedora-package-builder/src/core/platform"
-	"github.com/your-github-username/fedora-package-builder/src/core/project"
-	"github.com/your-github-username/fedora-package-builder/src/infra/external"
+	corearchive "github.com/your-github-username/fedora-package-infra/builder/src/core/archive"
+	"github.com/your-github-username/fedora-package-infra/builder/src/core/commandline"
+	"github.com/your-github-username/fedora-package-infra/builder/src/core/packages"
+	"github.com/your-github-username/fedora-package-infra/builder/src/core/platform"
+	"github.com/your-github-username/fedora-package-infra/builder/src/core/project"
+	"github.com/your-github-username/fedora-package-infra/builder/src/infra/external"
 )
 
 type Service struct {
