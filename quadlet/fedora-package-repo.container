@@ -8,7 +8,7 @@ Requires=fedora-package-repo.network
 Image=localhost/fedora-package-repo-nginx:latest
 ContainerName=fedora-package-repo
 Network=fedora-package-repo.network
-PublishPort=8080:8080
+PublishPort=8090:8080
 UserNS=keep-id
 Volume=%h/fedora-package-repo/repo:/srv/repo:ro,Z
 

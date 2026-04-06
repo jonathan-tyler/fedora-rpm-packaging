@@ -14,5 +14,5 @@ cat <<EOF
 WSL wrapper completed.
 
 Final step:
-  sudo -iu ${REPO_SERVICE_USER:-reposvc} systemctl --user enable --now fedora-package-repo.service
+  start the generated service through the helper bootstrap path
 EOF

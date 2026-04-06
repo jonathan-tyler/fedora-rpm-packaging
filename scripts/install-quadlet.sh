@@ -21,5 +21,5 @@ cat <<EOF
 Installed Quadlet files.
 
 Next step:
-  systemctl --user enable --now fedora-package-repo.service
+  systemctl --user start fedora-package-repo.service
 EOF
