@@ -1,6 +1,6 @@
 # Fedora RPM Packaging
 
-Monorepo for the Fedora package builder and the Fedora package repo service.
+Build, sign, publish, and serve custom Fedora RPM repositories with a local builder workflow, helper-container isolation, and a lightweight repo service.
 
 ## Layout
 
