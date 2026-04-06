@@ -1,0 +1,11 @@
+state/
+bin/
+*.rpm
+*.src.rpm
+packaging/*/SOURCES/
+.DS_Store
+*~
+.env
+.env.*
+!.env.example
+*.log

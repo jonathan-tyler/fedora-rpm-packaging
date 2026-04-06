@@ -1,0 +1,7 @@
+{
+  "repo_url": "https://github.com/alexpasmantier/television.git",
+  "build_system": "cargo",
+  "output_binaries": ["tv"],
+  "vendor_hint": "Confirm the current upstream Cargo flow, then freeze dependencies with cargo vendor.",
+  "container_binary_build": "yes"
+}

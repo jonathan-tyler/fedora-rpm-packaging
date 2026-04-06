@@ -1,0 +1,8 @@
+FROM registry.fedoraproject.org/fedora:42
+
+RUN dnf -y install bash coreutils diffutils mock sed && \
+    dnf clean all
+
+COPY mock-rebuild.sh /usr/local/bin/mock-rebuild-helper
+
+RUN chmod 0755 /usr/local/bin/mock-rebuild-helper

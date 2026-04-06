@@ -1,0 +1,7 @@
+%_signature gpg
+%_gpg_name YOUR KEY ID
+%__gpg /usr/bin/gpg
+%_gpg_path ~/.gnupg
+%_gpg_digest_algo sha256
+%_binary_filedigest_algorithm 8
+%_source_filedigest_algorithm 8

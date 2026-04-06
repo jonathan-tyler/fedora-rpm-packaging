@@ -1,0 +1,7 @@
+{
+  "repo_url": "https://github.com/joshmedeski/sesh.git",
+  "build_system": "go",
+  "output_binaries": ["sesh"],
+  "vendor_hint": "Run go mod vendor and include the vendor tree in the source snapshot.",
+  "container_binary_build": "yes"
+}

@@ -1,0 +1,8 @@
+FROM registry.fedoraproject.org/fedora:42
+
+RUN dnf -y install bash coreutils findutils gzip redhat-rpm-config rpm-build tar && \
+    dnf clean all
+
+COPY build-srpm.sh /usr/local/bin/build-srpm
+
+RUN chmod 0755 /usr/local/bin/build-srpm

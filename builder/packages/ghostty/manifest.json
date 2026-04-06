@@ -1,0 +1,8 @@
+{
+  "repo_url": "https://github.com/ghostty-org/ghostty.git",
+  "output_binaries": [
+    "ghostty"
+  ],
+  "vendor_hint": "Ghostty uses the connected prep phase to clone the latest release tag and prefetch the Zig cache for the offline build.",
+  "container_binary_build": "yes"
+}
