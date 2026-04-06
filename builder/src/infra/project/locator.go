@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	coreproject "github.com/your-github-username/fedora-package-infra/builder/src/core/project"
+	coreproject "github.com/jonathan-tyler/fedora-rpm-packaging/builder/src/core/project"
 )
 
 const rootOverrideEnv = "FEDORA_PACKAGE_BUILDER_ROOT"

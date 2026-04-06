@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/your-github-username/fedora-package-infra/builder/src/app/bootstrap"
-	"github.com/your-github-username/fedora-package-infra/builder/src/commands/dispatch"
+	"github.com/jonathan-tyler/fedora-rpm-packaging/builder/src/app/bootstrap"
+	"github.com/jonathan-tyler/fedora-rpm-packaging/builder/src/commands/dispatch"
 )
 
 func NewListCommand(services *bootstrap.Services, stdout io.Writer) dispatch.FuncCommand {

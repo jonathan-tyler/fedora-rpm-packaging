@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/your-github-username/fedora-package-infra/builder/src/infra/external"
+	"github.com/jonathan-tyler/fedora-rpm-packaging/builder/src/infra/external"
 )
 
 type ToolingLoader struct{}

@@ -3,7 +3,7 @@ package external
 import (
 	"io"
 
-	"github.com/your-github-username/fedora-package-infra/builder/src/core/platform"
+	"github.com/jonathan-tyler/fedora-rpm-packaging/builder/src/core/platform"
 )
 
 type SystemctlTool struct {

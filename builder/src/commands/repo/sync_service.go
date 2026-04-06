@@ -6,8 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/your-github-username/fedora-package-infra/builder/src/app/bootstrap"
-	"github.com/your-github-username/fedora-package-infra/builder/src/commands/dispatch"
+	"github.com/jonathan-tyler/fedora-rpm-packaging/builder/src/app/bootstrap"
+	"github.com/jonathan-tyler/fedora-rpm-packaging/builder/src/commands/dispatch"
 )
 
 func NewSyncServiceCommand(services *bootstrap.Services) dispatch.FuncCommand {

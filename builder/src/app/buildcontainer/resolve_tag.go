@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/your-github-username/fedora-package-infra/builder/src/core/packages"
+	"github.com/jonathan-tyler/fedora-rpm-packaging/builder/src/core/packages"
 )
 
 type ResolvedTag struct {

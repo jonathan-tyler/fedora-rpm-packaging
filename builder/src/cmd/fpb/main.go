@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/your-github-username/fedora-package-infra/builder/src/app/bootstrap"
-	buildcmd "github.com/your-github-username/fedora-package-infra/builder/src/commands/build"
-	"github.com/your-github-username/fedora-package-infra/builder/src/commands/dispatch"
-	"github.com/your-github-username/fedora-package-infra/builder/src/commands/packagecmd"
-	repocmd "github.com/your-github-username/fedora-package-infra/builder/src/commands/repo"
-	sourcecmd "github.com/your-github-username/fedora-package-infra/builder/src/commands/source"
-	upstreamcmd "github.com/your-github-username/fedora-package-infra/builder/src/commands/upstream"
+	"github.com/jonathan-tyler/fedora-rpm-packaging/builder/src/app/bootstrap"
+	buildcmd "github.com/jonathan-tyler/fedora-rpm-packaging/builder/src/commands/build"
+	"github.com/jonathan-tyler/fedora-rpm-packaging/builder/src/commands/dispatch"
+	"github.com/jonathan-tyler/fedora-rpm-packaging/builder/src/commands/packagecmd"
+	repocmd "github.com/jonathan-tyler/fedora-rpm-packaging/builder/src/commands/repo"
+	sourcecmd "github.com/jonathan-tyler/fedora-rpm-packaging/builder/src/commands/source"
+	upstreamcmd "github.com/jonathan-tyler/fedora-rpm-packaging/builder/src/commands/upstream"
 )
 
 var version = "dev"

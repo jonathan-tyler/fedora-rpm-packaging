@@ -1,4 +1,4 @@
-# Fedora Package Infra
+# Fedora RPM Packaging
 
 Monorepo for the Fedora package builder and the Fedora package repo service.
 
